@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Upload with Questions</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    .file-block { border: 1px solid #ddd; padding: 1em; margin-bottom: 1em; }
+    textarea { width: 100%; height: 60px; }
+  </style>
+</head>
+<body>
+  <h1>Upload PDFs with Questions</h1>
+  <form id="uploadForm">
+    <label>Product ID (UUID):</label><br>
+    <input type="text" id="productId" name="productId" required style="width: 400px;"><br><br>
+
+    <input type="file" id="fileInput" name="files" multiple accept="application/pdf"><br><br>
+
+    <div id="fileQuestions"></div>
+
+    <button type="submit">Upload</button>
+  </form>
+
+  <pre id="result"></pre>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const fileQuestionsDiv = document.getElementById("fileQuestions");
+const form = document.getElementById("uploadForm");
+const resultBox = document.getElementById("result");
+
+fileInput.addEventListener("change", () => {
+  fileQuestionsDiv.innerHTML = "";
+  for (const file of fileInput.files) {
+    const block = document.createElement("div");
+    block.className = "file-block";
+    block.innerHTML = `
+      <strong>${file.name}</strong><br>
+      <label>Questions (one per line):</label><br>
+      <textarea data-filename="${file.name}"></textarea>
+    `;
+    fileQuestionsDiv.appendChild(block);
+  }
+});
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const productId = document.getElementById("productId").value;
+  const files = fileInput.files;
+
+  const qmap = {};
+  document.querySelectorAll("textarea").forEach(t => {
+    const fn = t.dataset.filename;
+    qmap[fn] = t.value.split("\n").map(s => s.trim()).filter(Boolean);
+  });
+
+  const formData = new FormData();
+  formData.append("product_id", productId);
+  formData.append("questions_json", JSON.stringify(qmap));
+  for (const file of files) {
+    formData.append("files", file);
+  }
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/upload/", {
+      method: "POST",
+      body: formData
+    });
+    const data = await res.json();
+    resultBox.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    resultBox.textContent = "Error: " + err;
+  }
+});
+</script>
+</body>
+</html>

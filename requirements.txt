@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+requests
+PyPDF2
+openai
+supabase
+asyncio
+pydantic
+pydantic-settings
