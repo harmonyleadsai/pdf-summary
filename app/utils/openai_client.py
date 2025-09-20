@@ -1,14 +1,14 @@
-from openai import AsyncOpenAI
-from typing import List, Dict
-from .pdf import extract_text_from_pdf_bytes
-from app.config import settings
 import json
 import logging
+from typing import List, Dict
+
+from openai import AsyncOpenAI
+
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-
 
 async def call_openai_summary_and_qa(text: str, questions: List[str]) -> Dict:
     max_chars = 2000_000
@@ -44,7 +44,7 @@ async def call_openai_summary_and_qa(text: str, questions: List[str]) -> Dict:
 
     user_prompt = "\n".join(prompt_parts)
 
-    print("user_prompt: ", user_prompt)
+    #print("user_prompt: ", user_prompt)
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -52,11 +52,7 @@ async def call_openai_summary_and_qa(text: str, questions: List[str]) -> Dict:
     ]
 
     resp = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=messages,
-        temperature=0.0,
-        max_tokens=2000,
-    )
+        model=settings.OPENAI_MODEL, messages = messages, temperature=0.0, max_tokens=2000,)
 
     content = resp.choices[0].message.content
 
