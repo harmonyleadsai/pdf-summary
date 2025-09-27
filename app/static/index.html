@@ -64,7 +64,7 @@ form.addEventListener("submit", async (e) => {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:8001/upload/", {
+    const res = await fetch("http://localhost:443/upload/", {
       method: "POST",
       body: formData
     });
